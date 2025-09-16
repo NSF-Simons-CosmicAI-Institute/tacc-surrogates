@@ -1,0 +1,7 @@
+torch
+numpy
+scipy
+matplotlib
+h5py
+neuraloperator
+torchdiffeq
