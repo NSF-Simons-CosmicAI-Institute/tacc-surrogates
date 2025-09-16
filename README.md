@@ -31,4 +31,4 @@ data_pred = fno_test.eval(x0)
 
 The FNO architecture can be swapped with any member of the 'models' sub-directory. The goal is to allow users to quickly swap model architecures without having to reformat their data.
 
-The architectures in this repository are valid for any training dataset cast into an "input/output" format. Time series data is formatted with prior time steps as input, and future time steps as output. test_fno_flowbench.py provides an example of how to format training data, using the FlowBench dataset as an example. run_tacc_surrogates.sh provides an example of how to submit a tacc-surrogates training job to TACC's Lonestar6.
+The architectures in this repository are valid for any training dataset cast into "input/output" format. Time series data is formatted with prior time steps as input, and future time steps as output. test_fno.py provides an example of how to format training data, using the [FlowBench dataset](https://huggingface.co/datasets/BGLab/FlowBench) as an example. run_tacc_surrogates.sh provides an example of how to submit a tacc-surrogates training job to TACC's Lonestar6.
