@@ -17,13 +17,15 @@ import torch.nn.functional as F
 # Import PyTorch differential equation library
 from torchdiffeq import odeint
 
+# Import base model methods
+from Base import Base_Model as Base_Model
+
 # NODE: Neural Ordinary Differential Equation
-class NODE(torch.nn.Module):
+class NODE(Base_Model):
 
 	# Initialization:
 	def __init__(
 		self,
-		n_epoch: int,
 		n_channel: int,
 		kernel_size: int = 5,
 		padding: str = 'same'
@@ -31,10 +33,6 @@ class NODE(torch.nn.Module):
 
 			super().__init__()
 
-			# Training specifications
-			self.n_epoch = n_epoch
-
-			# Convolution specifications
 			self.n_channel = n_channel
 			self.kernel_size = kernel_size
 			self.padding = padding
