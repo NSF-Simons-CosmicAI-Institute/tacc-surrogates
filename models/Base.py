@@ -14,6 +14,9 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
+# Import default loss function
+from loss_functions import MSE
+
 # Base Model: template class that includes methods common to all architectures
 class Base_Model(torch.nn.Module):
 
@@ -31,17 +34,27 @@ class Base_Model(torch.nn.Module):
 		self.learning_rate = learning_rate
 
 		self.model = nn.Identity()
-		self.loss_function = nn.MSELoss()
+		self.loss_function = MSE()
 
 
 	# Forward pass function
 	def forward(self, x):
 		return self.model(x)	
 
+	# Data packing function
+	def data_packing(self,data):
+		return data	
+
+	def data_unpacking(self,data)
+		return data	
+
 	# Training function 
 	def train(self, data_in, data_out):
 
 		optimizer = optim.Adam(list(self.model.parameters()), lr = self.learning_rate)
+
+		data_in = data_packing(self,data_in)
+		data_out = data_packing(self,data_out)
 
 		for it in range(0, self.n_epoch):
 
@@ -67,5 +80,7 @@ class Base_Model(torch.nn.Module):
 	# Evaluation function:
 	def eval(self,x0):
 		# x0 - the data point from which the prediction starts
-		x_pred = self.forward(x0)
-		return x_pred			
+		x_in _ = data_packing(self,x0)
+		x_pred = self.forward(x_in)
+		x_out = data_unpacking(self,x_pred)
+		return x_out			

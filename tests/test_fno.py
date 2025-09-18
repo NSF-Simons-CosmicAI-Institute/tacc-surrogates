@@ -11,45 +11,40 @@ from matplotlib import pyplot as plt
 # Custom print
 print = functools.partial(print, flush=True)
 
-# Reynolds number (target)
+# Dataset Information: Reynolds number (FlowBench specific) and total number of cases
+num_cases = 10
 re_target = 200.
 
-# FNO Specifications (num prior time steps + num forward time steps)
-num_prior = 4
-num_forward = 10
+# Dataset Information: Time series specifications for each case
+num_timesteps_prior = 4
+num_timesteps_forward = 10
+num_timesteps_total = 242
+num_total_batches = num_cases*(num_total-num_prior-num_forward)
 
-# Root directory
+# Dataset Information: Root directory
 root = '/scratch/10386/lsmith9003/data/FlowBench/FPO_NS_2D_1024x256/harmonics/'
 subdir_array = np.arange(1,10,1)
 subdir_array = clean_subdir_array(root,subdir_array)
 print('allocating data arrays')
 
 # Intialize datasets
-data_in = np.zeros((len(subdir_array)*(242-num_prior-num_forward),2+3*num_prior,256,1024))
-data_out = np.zeros((len(subdir_array)*(242-num_prior-num_forward),3*num_forward,256,1024))
+data_in = np.zeros((num_total_batches,num_prior,256,1024,3))
+data_out = np.zeros((num_total_batches,num_forward,256,1024,3))
 print('allocation done')
 print('loading data')
 
-# Load dataset
+# Load dataset into the standard format
 count = 0
 for subdir in subdir_array:
 	dir_path = root + str(subdir)
 	re_load = get_re_load(re_target,dir_path)
 
 	print('Loading data for path: ' + dir_path + ' Re = ' + str(re_load))
-
 	data_flow = np.load(root + str(subdir) + '/Re_' + str(re_load) + '.npz')['data']
-	data_geom = np.load(root + str(subdir) + '/input_geometry.npz')
-	for ind in range(num_prior,242-num_forward):
-		data_in[count,0,:,:] = data_geom['data']
-		data_in[count,1,:,:] = data_geom['mask']
-		data_in[count,2:(2+num_prior),:,:] = np.squeeze(data_flow[ind-num_prior:ind,:,:,0])
-		data_in[count,(2+num_prior):(2+2*num_prior),:,:] = np.squeeze(data_flow[ind-num_prior:ind,:,:,1])
-		data_in[count,(2+2*num_prior):(2+3*num_prior),:,:] = np.squeeze(data_flow[ind-num_prior:ind,:,:,2])
 
-		data_out[count,0:num_forward,:,:] = np.squeeze(data_flow[ind:ind+num_forward,:,:,0])
-		data_out[count,num_forward:2*num_forward,:,:] = np.squeeze(data_flow[ind:ind+num_forward,:,:,1])
-		data_out[count,2*num_forward:3*num_forward,:,:] = np.squeeze(data_flow[ind:ind+num_forward,:,:,2])
+	for ind in range(num_prior,242-num_forward):
+		data_in[count,:,:,:,:] = np.squeeze(data_flow[ind-num_prior:ind,:,:,:])
+		data_out[count,:,:,:,:] = np.squeeze(data_flow[ind:ind+num_forward,:,:,0])
 		count += 1
 
 # Convert to tensor
@@ -61,17 +56,18 @@ print('initializing FNO')
 fno_test = FNO(
 	n_modes=(16,16),
 	hidden_channels=32,
-	in_channels=(2+3*num_prior),
-	out_channels=(3*num_forward),
 	n_epoch=10,
-	batch_size=16
+	batch_size=16,
+	num_prior=num_prior,
+	num_forward=num_forward,
+	num_features=data_in.shape[-1]
 	)
 print('done')
 
 # Train
-#print('starting training')
-#fno_test.train(data_in,data_out)
-#print('done')
+print('starting training')
+fno_test.train(data_in,data_out)
+print('done')
 
 # Save
 print('Saving model...')
@@ -79,32 +75,45 @@ torch.save(fno_test,'fno_flowbench.pth')
 print('done')
 
 # Eval
-print('Evaluating...')
-fno_test = torch.load('fno_flowbench.pth',weights_only=False)
-x0 = data_in[0:2]
-data_pred = fno_test.eval(x0)
+#print('Evaluating...')
+#fno_test = torch.load('fno_flowbench.pth',weights_only=False)
+#x0 = data_in[0:2]
+#data_pred = fno_test.eval(x0)
 
 # Plot time series prediction
-data_pred = data_pred[0]
-u_pred = data_pred[0:10]
-v_pred = data_pred[10:20]
-p_pred = data_pred[20:30]
-u_true = data_out[0][0:10]
-v_true = data_out[0][10:20]
-p_true = data_out[0][20:30]
-for time_ind in range(0,len(u_pred)):
-    plt.figure(figsize=(10,2))
-    plt.subplot(1,2,1)
-    plt.pcolormesh(np.squeeze(u_pred[time_ind].detach().numpy()),vmin=-1,vmax=2,cmap='RdBu')
-    plt.xticks([])
-    plt.yticks([])
-    plt.title('Predicted')
-    plt.subplot(1,2,2)
-    plt.pcolormesh(np.squeeze(u_true[time_ind].detach().numpy()),vmin=-1,vmax=2,cmap='RdBu')
-    plt.xticks([])
-    plt.yticks([])
-    plt.title('True')
-    plt.savefig("figures/fig"+str(time_ind)+".png")
-print('figures saved')
-print(np.shape(data_pred))
-print('done')
+# data_pred = data_pred[0]
+# u_pred = data_pred[0:10]
+# v_pred = data_pred[10:20]
+# p_pred = data_pred[20:30]
+# u_true = data_out[0][0:10]
+# v_true = data_out[0][10:20]
+# p_true = data_out[0][20:30]
+# for time_ind in range(0,len(u_pred)):
+#     plt.figure(figsize=(10,2))
+#     plt.subplot(1,2,1)
+#     plt.pcolormesh(np.squeeze(u_pred[time_ind].detach().numpy()),vmin=-1,vmax=2,cmap='RdBu')
+#     plt.xticks([])
+#     plt.yticks([])
+#     plt.title('Predicted')
+#     plt.subplot(1,2,2)
+#     plt.pcolormesh(np.squeeze(u_true[time_ind].detach().numpy()),vmin=-1,vmax=2,cmap='RdBu')
+#     plt.xticks([])
+#     plt.yticks([])
+#     plt.title('True')
+#     plt.savefig("figures/fig"+str(time_ind)+".png")
+# print('figures saved')
+# print(np.shape(data_pred))
+# print('done')
+
+
+# Load dataset, put into the form:
+# input: (batch, num_prior, x-direction, y-direction, features)
+# output: (batch, num_forward, x-direction, y-direction, features)
+# Then we'll have a processing code in utils.py that will package 
+# your data for you into a form that is acceptable for the architecture of interest
+#
+# Or we could just add the data packing as a method to each model py. I like this a lot better,
+# because then the user doesn't ever need to interact with data packing.
+#
+# If you are not dealing with a grid, then we can collapse everything after dim=1 into the
+# the same channel.

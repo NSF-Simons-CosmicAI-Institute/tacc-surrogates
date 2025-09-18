@@ -31,20 +31,38 @@ class FNO(Base_Model):
 		self,
 		n_modes: tuple,
 		hidden_channels: int,
-		in_channels: int,
-		out_channels: int,
+		num_prior: int,
+		num_forward: int,
+		num_features: int,
 		):
 
 		super().__init__()
 		self.n_modes = n_modes
 		self.hidden_channels = hidden_channels
-		self.in_channels = in_channels
-		self.out_channels = out_channels
+		self.num_prior = num_prior
+		self.num_forward = num_forward
+		self.num_features = num_features
 
 		self.model = FNO_Base(
 			n_modes = self.n_modes,
 			hidden_channels = self.hidden_channels,
-			in_channels = self.in_channels,
-			out_channels = self.out_channels)
+			in_channels = self.num_prior*num_features,
+			out_channels = self.num_forward*num_features)
 
 		self.loss_function = nn.MSELoss()
+
+
+	# Data packing function
+	def data_packing(self,data):
+		data_moved = np.moveaxis(data,1,-1)
+		data_flat = data_moved.reshape(*data_moved.shape[:-2],-1)
+		data_packed = np.moveaxis(data_flat,-1,1)
+		return data_packed
+
+	# Data un-packing function
+	def data_unpacking(self,data):
+		data_moved = np.moveaxis(data,1,-1)
+		data_expanded = data_moved.reshape((*data_moved.shape[:-1], self.num_features, self.num_forward))
+		data_unpacked = np.moveaxis(data_expanded,-1,1)
+		return data_unpacked			
+	
