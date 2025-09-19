@@ -2,8 +2,8 @@
 
 TACC-Surrogates is a series of python wrappers and environment configuration files intended to streamline the training and evaluation of surrogate models on TACC systems. In this repository, we collect a number of popular surrogate model architectures, and outfit each with a common initialization, training, and evaluation method.
 
-The main advantage of TACC-surrogates is its common data structure. Our intent is for the user
-to swap model architectures without having to reformat their dataset. Toward this end, we adopt the following standard shape for input/output datasets:
+The main advantage of TACC-Surrogates is its common data structure. Our intent is for the user
+to freely swap model architectures without having to reformat their dataset. Toward this end, we adopt the following standard shape for input/output datasets:
 
 (batch, num_timesteps_prior, **features)
 
@@ -35,9 +35,9 @@ module load cuda/12.2
 source /scratch/10386/lsmith9003/python-envs/tacc-surrogates/bin/activate
 ```
 
-## Training Data on Existing Architectures
+## Training on Existing Architectures
 
-The user can train on any architecture in the models sub-directory with just a few function calls. Namely, if the user has already loaded the correct envionrment and shaped their data according to the standard format, they need only (1) initialize an instance of the model architecture, and (2) call the built-in .train method. 
+The user can train on any architecture in the ```models``` sub-directory with just a few function calls. Namely, if the user has already loaded the correct envionrment and shaped their data according to the standard format, they need only (1) initialize an instance of the model architecture, and (2) call the built-in .train method. 
 
 As an example, if one wishes to train their dataset using the Fourier Neural Operator (FNO), 
 they need only run the following commands:
@@ -58,7 +58,7 @@ fno_test = FNO(
 fno_test.train(data_in,data_out)
 ```
 
-The arguments for initialization (n_epoch, batch_size, etc.) can be found by looking at the relevant .py file within the models sub-directory. Most initialization steps are quite similar.
+The arguments for initialization (n_epoch, batch_size, etc.) can be found by looking at the relevant file within the ```models``` sub-directory. Most initialization steps are quite similar.
 
 If there is any confusion regarding the initialization/training of a given architecture, the ```tests``` sub-directory contains a complete submission script for certain models, with the [FlowBench dataset](https://baskargroup.bitbucket.io/) serving as a test bed. This sub-directory will be updated as tests are completed on new architectures.
 
