@@ -15,7 +15,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 
 # Import default loss function
-from loss_functions import MSE
+from loss_functions.MSE import MSE
 
 # Base Model: template class that includes methods common to all architectures
 class Base_Model(torch.nn.Module):
@@ -45,7 +45,7 @@ class Base_Model(torch.nn.Module):
 	def data_packing(self,data):
 		return data	
 
-	def data_unpacking(self,data)
+	def data_unpacking(self,data):
 		return data	
 
 	# Training function 
@@ -53,9 +53,11 @@ class Base_Model(torch.nn.Module):
 
 		optimizer = optim.Adam(list(self.model.parameters()), lr = self.learning_rate)
 
-		data_in = data_packing(self,data_in)
-		data_out = data_packing(self,data_out)
+		print('Packing data...')
+		data_in = self.data_packing(data_in)
+		data_out = self.data_packing(data_out)
 
+		print('Starting training...')
 		for it in range(0, self.n_epoch):
 
 			ind_shuffle = torch.randperm(data_in.size()[0])
@@ -74,13 +76,12 @@ class Base_Model(torch.nn.Module):
 				loss.backward()
 				optimizer.step()
 
-			if it==0 or it%1==0:
-				print('Epoch: ' + str(it) + '  |  ' + 'Loss: ' + str(float(loss.item())))
+			print('Epoch: ' + str(it) + '  |  ' + 'Loss: ' + str(float(loss.item())))
 
 	# Evaluation function:
 	def eval(self,x0):
 		# x0 - the data point from which the prediction starts
-		x_in _ = data_packing(self,x0)
+		x_in = self.data_packing(x0)
 		x_pred = self.forward(x_in)
-		x_out = data_unpacking(self,x_pred)
+		x_out = self.data_unpacking(x_pred)
 		return x_out			

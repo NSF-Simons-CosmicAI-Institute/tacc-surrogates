@@ -21,7 +21,7 @@ import torch.nn.functional as F
 from neuralop.models import FNO as FNO_Base
 
 # Import base model methods
-from Base import Base_Model as Base_Model
+from models.Base import Base_Model as Base_Model
 
 # FNO: Fourier Neural Operator
 class FNO(Base_Model):
@@ -34,9 +34,12 @@ class FNO(Base_Model):
 		num_prior: int,
 		num_forward: int,
 		num_features: int,
+		n_epoch: int,
+		batch_size: int,
+		learning_rate: float = 1e-3
 		):
 
-		super().__init__()
+		super().__init__(n_epoch,batch_size,learning_rate)
 		self.n_modes = n_modes
 		self.hidden_channels = hidden_channels
 		self.num_prior = num_prior
@@ -54,15 +57,15 @@ class FNO(Base_Model):
 
 	# Data packing function
 	def data_packing(self,data):
-		data_moved = np.moveaxis(data,1,-1)
+		data_moved = torch.moveaxis(data,1,-1)
 		data_flat = data_moved.reshape(*data_moved.shape[:-2],-1)
-		data_packed = np.moveaxis(data_flat,-1,1)
+		data_packed = torch.moveaxis(data_flat,-1,1)
 		return data_packed
 
 	# Data un-packing function
 	def data_unpacking(self,data):
-		data_moved = np.moveaxis(data,1,-1)
+		data_moved = torch.moveaxis(data,1,-1)
 		data_expanded = data_moved.reshape((*data_moved.shape[:-1], self.num_features, self.num_forward))
-		data_unpacked = np.moveaxis(data_expanded,-1,1)
+		data_unpacked = torch.moveaxis(data_expanded,-1,1)
 		return data_unpacked			
 	

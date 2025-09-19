@@ -18,7 +18,7 @@ import torch.nn.functional as F
 from torchdiffeq import odeint
 
 # Import base model methods
-from Base import Base_Model as Base_Model
+from models.Base import Base_Model as Base_Model
 
 # NODE: Neural Ordinary Differential Equation
 class NODE(Base_Model):
@@ -28,10 +28,13 @@ class NODE(Base_Model):
 		self,
 		n_channel: int,
 		kernel_size: int = 5,
-		padding: str = 'same'
+		padding: str = 'same',
+		n_epoch: int,
+		batch_size: int,
+		learning_rate: float = 1e-3
 		):
 
-			super().__init__()
+			super().__init__(n_epoch,batch_size,learning_rate)
 
 			self.n_channel = n_channel
 			self.kernel_size = kernel_size

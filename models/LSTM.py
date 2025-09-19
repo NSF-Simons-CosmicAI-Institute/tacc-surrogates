@@ -17,7 +17,7 @@ import torch.optim as optim
 from torch.nn import LSTM as LSTM_Base
 
 # Import base model methods
-from Base import Base_Model as Base_Model
+from models.Base import Base_Model as Base_Model
 
 
 # LSTM: Long Short Term Memory
@@ -29,9 +29,12 @@ class LSTM(Base_Model):
 		input_size: int,
 		hidden_size: int,
 		num_layers: int,
+		n_epoch: int,
+		batch_size: int,
+		learning_rate: float = 1e-3
 		):
 
-		super().__init__()
+		super().__init__(n_epoch,batch_size,learning_rate)
 		self.input_size = input_size
 		self.hidden_size = hidden_size
 		self.num_layers = num_layers

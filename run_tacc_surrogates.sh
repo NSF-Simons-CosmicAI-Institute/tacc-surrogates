@@ -16,6 +16,7 @@ module load cuda/12.2
 
 # Load tacc-surrogates libraries
 source /scratch/10386/lsmith9003/python-envs/tacc-surrogates/bin/activate
+export PYTHONPATH=$SCRATCH/scripts/tacc-surrogates
 
 # Run flow bench training/evaluation
-python test_fno.py > log.test_fno
+python tests/test_fno.py > log.test_fno
