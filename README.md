@@ -7,12 +7,11 @@ to load/format their dataset only once, with the following standard shape:
 
 (batch, num_timesteps_prior, **features)
 
-Batch corresponds to the batch dimension, num_timesteps_prior corresponds to the number
+Here, batch corresponds to the batch dimension, num_timesteps_prior corresponds to the number
 of previous timesteps available to a given forward prediction (the same idea as sequence length),
 and **features corresponds to the data features associated with each timestep. 
 These features can be organizaed as a single, flattened array, or as 
 a multi-dimensional grid (if one chooses an architecture that exploits spatial correlations). 
-From experience, most scientific time-series datasets can be adapted to this format.
 
 Each member of the models subdirectory is configured to accept datasets in the standard form, with custom data-packing functions handling any necessary conversions. In turn, the user is free to swap model architectures without having to reformat their dataset. 
 
@@ -38,9 +37,9 @@ source /scratch/10386/lsmith9003/python-envs/tacc-surrogates/bin/activate
 
 ## Training Data on Existing Architectures
 
-The user can train on any architecture within the models sub-directory with just a few function calls. Namely, if the user has already loaded the correct the envionrment and shaped their data according to the standard format, they need only to (1) initialize an instance of the model architecture, and (2) call the built-in .train method. 
+The user can train on any architecture in the models sub-directory with just a few function calls. Namely, if the user has already loaded the correct envionrment and shaped their data according to the standard format, they need only (1) initialize an instance of the model architecture, and (2) call the built-in .train method. 
 
-As an example, if one wishes to train their dataset on the Fourier Neural Operator (FNO) architecture, 
+As an example, if one wishes to train their dataset using the Fourier Neural Operator (FNO), 
 they need only run the following commands:
 
 ```
@@ -59,7 +58,7 @@ fno_test = FNO(
 fno_test.train(data_in,data_out)
 ```
 
-The arguments for initialization (n_epoch, batch_size, etc.) for a given architecture can be found by looking at the relevant .py file within the models sub-directory. Most initialization steps are quite similar.
+The arguments for initialization (n_epoch, batch_size, etc.) can be found by looking at the relevant .py file within the models sub-directory. Most initialization steps are quite similar.
 
 If there is any confusion regarding the initialization/training of a given architecture, the ```tests``` sub-directory contains a complete submission script for certain models, with the [FlowBench dataset](https://baskargroup.bitbucket.io/) serving as a test bed. This sub-directory will be updated as tests are completed on new architectures.
 
@@ -71,11 +70,11 @@ Adding a new architecure to TACC-Surrogates consists of the following two steps:
 1) Adding a new entry to the ```models``` sub-directory
 2) Adding a demonstration/verification of the model to the ```tests``` sub-directory
 
-Each entry in the ```models``` sub-directory inherits the Base_Model class defined in Base.py. This script contains the default training and evaluation methods. When writing a new model file, one will generally need to append inherited base class with:
+Each entry in the ```models``` sub-directory inherits the Base_Model class defined in Base.py. This script contains the default training and evaluation methods. When writing a new model file, one will generally need to append the inherited base class with:
 
 1) An __init__ method, which defines the input arguments to your new model.
-2) A model object, which is defined as self.model in the base __init__. This is where you define/link your custom architecture. Note that self.model does not need to be configured to accept the standard data format as input (we typically leave this as a separate data packing step).
-3) A loss-function object, again defined as self.loss_function within the base __init__.
+2) A model object, which defines/links to your custom architecture. The model object is defined as self.model in the base __init__ and must be a torch.nn module object. Note that self.model does not need to be configured to accept the standard data format as input (we typically leave this as a separate data packing step).
+3) A loss-function object, which defines the loss function for your training loop. This is again defined as self.loss_function within the base __init__ and must be a torch.nn module object.
 4) A data-packing method. This method is repsonsible for converting input data from the standard format to a format accepted by self.model. Some model calls (such as Pytorch's LSTM) already work with the standard format, while others (such as the FNO) require shifting data channels.
 
 We recommend the FNO.py script as a reliable template for constructing new model architecture files.
