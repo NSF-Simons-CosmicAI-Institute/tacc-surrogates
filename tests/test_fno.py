@@ -60,7 +60,7 @@ fno_test = FNO(
 	batch_size=16,
 	num_prior=num_timesteps_prior,
 	num_forward=num_timesteps_forward,
-	num_features=data_in.shape[-1]
+	num_vector_components=data_in.shape[-1]
 	)
 print('done')
 
@@ -106,15 +106,3 @@ print('Done.')
 # print(np.shape(data_pred))
 # print('done')
 
-
-# Load dataset, put into the form:
-# input: (batch, num_prior, x-direction, y-direction, features)
-# output: (batch, num_forward, x-direction, y-direction, features)
-# Then we'll have a processing code in utils.py that will package 
-# your data for you into a form that is acceptable for the architecture of interest
-#
-# Or we could just add the data packing as a method to each model py. I like this a lot better,
-# because then the user doesn't ever need to interact with data packing.
-#
-# If you are not dealing with a grid, then we can collapse everything after dim=1 into the
-# the same channel.

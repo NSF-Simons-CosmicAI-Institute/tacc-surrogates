@@ -33,7 +33,7 @@ class FNO(Base_Model):
 		hidden_channels: int,
 		num_prior: int,
 		num_forward: int,
-		num_features: int,
+		num_vector_components: int,
 		n_epoch: int,
 		batch_size: int,
 		learning_rate: float = 1e-3
@@ -44,7 +44,7 @@ class FNO(Base_Model):
 		self.hidden_channels = hidden_channels
 		self.num_prior = num_prior
 		self.num_forward = num_forward
-		self.num_features = num_features
+		self.num_vector_components = num_vector_components
 
 		self.model = FNO_Base(
 			n_modes = self.n_modes,
