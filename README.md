@@ -3,7 +3,7 @@
 TACC-Surrogates is a series of python wrappers and environment configuration files intended to streamline the training and evaluation of surrogate models on TACC systems. In this repository, we collect a number of popular surrogate model architectures, and outfit each with a common initialization, training, and evaluation method.
 
 The main advantage of TACC-surrogates is its common data structure. Our intent is for the user
-to load/format their dataset only once, with the following standard shape:
+to swap model architectures without having to reformat their dataset. Toward this end, we adopt the following standard shape for input/output datasets:
 
 (batch, num_timesteps_prior, **features)
 
@@ -13,7 +13,7 @@ and **features corresponds to the data features associated with each timestep.
 These features can be organizaed as a single, flattened array, or as 
 a multi-dimensional grid (if one chooses an architecture that exploits spatial correlations). 
 
-Each member of the models subdirectory is configured to accept datasets in the standard form, with custom data-packing functions handling any necessary conversions. In turn, the user is free to swap model architectures without having to reformat their dataset. 
+Each member of the ```models``` subdirectory is configured to accept datasets in the standard form. In turn, each model script is outfitted with a custom data-packing method that converts the standard format into one accepted by the architecture of interest. 
 
 
 ## Installing on Lonestar6
@@ -82,7 +82,7 @@ We recommend the FNO.py script as a reliable template for constructing new model
 
 ## List of Architectures to be Added
 
-The following is a master list of all architectures slated to be added to the models sub-directory. An (x) will be placed next to architectures that have been successfully uploaded and tested.
+The following is a master list of all architectures slated to be added to the ```models``` sub-directory. An (x) will be placed next to architectures that have been successfully uploaded and tested.
 
 - DMD
 - Neural ODE 
