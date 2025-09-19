@@ -1,3 +1,5 @@
+# TACC-Surrogates
+
 TACC-Surrogates is a series of python wrappers and environment configuration files intended to streamline the training and evaluation of surrogate models on TACC systems. In this repository, we collect a number of popular surrogate model architectures, and outfit each with a common initialization, training, and evaluation method.
 
 The main advantage of TACC-surrogates is its common data structure. Our intent is for the user
@@ -28,10 +30,11 @@ cd tacc-surrogates
 pip install tacc-surrogates/requirements.txt
 ```
 
-If you encounter any issues with the requirements file, or if you want to offload environment maintenance, we are also hosting a pre-installed version of the environment on a TACC staff account. You can activate it with the following command:
+If you encounter any issues with the requirements file, or if you want to offload environment maintenance, we are also hosting a pre-installed version of the environment on a TACC staff account. You can activate it with the following commands (permissions are set such that any user can activate):
+```
 module load cuda/12.2
 source /scratch/10386/lsmith9003/python-envs/tacc-surrogates/bin/activate
-
+```
 
 ## Training Data on Existing Architectures
 
@@ -70,10 +73,10 @@ Adding a new architecure to TACC-Surrogates consists of the following two steps:
 
 Each entry in the ```models``` sub-directory inherits the Base_Model class defined in Base.py. This script contains the default training and evaluation methods. When writing a new model file, one will generally need to append inherited base class with:
 
-a) An __init__ method, which defines the input arguments to your new model.
-b) A model object, which is defined as self.model in the base __init__. This is where you define/link your custom architecture. Note that self.model does not need to be configured to accept the standard data format as input (we typically leave this as a separate data packing step).
-c) A loss-function object, again defined as self.loss_function within the base __init__.
-d) A data-packing method. This method is repsonsible for converting input data from the standard format to a format accepted by self.model. Some model calls (such as Pytorch's LSTM) already work with the standard format, while others (such as the FNO) require shifting data channels.
+1) An __init__ method, which defines the input arguments to your new model.
+2) A model object, which is defined as self.model in the base __init__. This is where you define/link your custom architecture. Note that self.model does not need to be configured to accept the standard data format as input (we typically leave this as a separate data packing step).
+3) A loss-function object, again defined as self.loss_function within the base __init__.
+4) A data-packing method. This method is repsonsible for converting input data from the standard format to a format accepted by self.model. Some model calls (such as Pytorch's LSTM) already work with the standard format, while others (such as the FNO) require shifting data channels.
 
 We recommend the FNO.py script as a reliable template for constructing new model architecture files.
 
@@ -82,16 +85,16 @@ We recommend the FNO.py script as a reliable template for constructing new model
 
 The following is a master list of all architectures slated to be added to the models sub-directory. An (x) will be placed next to architectures that have been successfully uploaded and tested.
 
-DMD
-Neural ODE 
-FNO (x)
-LSTM 
-Straight MLP
-GINO - Geometry informed neural operator
-U-Net
-Deep-O-Net
-PINN
-GNN
-SINDy 
-Hamiltonian/Lagrangian NN
-PINO 
+- DMD
+- Neural ODE 
+- FNO (x)
+- LSTM 
+- MLP
+- GINO - Geometry informed neural operator
+- U-Net
+- Deep-O-Net
+- PINN
+- GNN
+- SINDy 
+- Hamiltonian/Lagrangian NN
+- PINO 
