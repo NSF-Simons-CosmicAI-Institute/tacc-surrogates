@@ -49,23 +49,29 @@ class FNO(Base_Model):
 		self.model = FNO_Base(
 			n_modes = self.n_modes,
 			hidden_channels = self.hidden_channels,
-			in_channels = self.num_prior*num_features,
-			out_channels = self.num_forward*num_features)
+			in_channels = self.num_prior*self.num_vector_components,
+			out_channels = self.num_forward*self.num_vector_components)
 
 		self.loss_function = nn.MSELoss()
 
 
 	# Data packing function
 	def data_packing(self,data):
-		data_moved = torch.moveaxis(data,1,-1)
-		data_flat = data_moved.reshape(*data_moved.shape[:-2],-1)
-		data_packed = torch.moveaxis(data_flat,-1,1)
+		if self.num_vector_components > 1:
+			data_moved = torch.moveaxis(data,1,-1)
+			data_flat = data_moved.reshape(*data_moved.shape[:-2],-1)
+			data_packed = torch.moveaxis(data_flat,-1,1)
+		else:
+			data_packed = data
 		return data_packed
 
 	# Data un-packing function
 	def data_unpacking(self,data):
-		data_moved = torch.moveaxis(data,1,-1)
-		data_expanded = data_moved.reshape((*data_moved.shape[:-1], self.num_features, self.num_forward))
-		data_unpacked = torch.moveaxis(data_expanded,-1,1)
+		if self.num_vector_components > 1:
+			data_moved = torch.moveaxis(data,1,-1)
+			data_expanded = data_moved.reshape((*data_moved.shape[:-1], self.num_vector_components, self.num_forward))
+			data_unpacked = torch.moveaxis(data_expanded,-1,1)
+		else:
+			data_unpacked = data
 		return data_unpacked			
 	

@@ -45,13 +45,36 @@ class LSTM(Base_Model):
 			num_layers = self.num_layers,
 			batch_first = True)
 
+		self.linear_layer = nn.Linear(self.hidden_size,self.input_size)
+
 		self.loss_function = nn.MSELoss()
 
 	# Forward pass function
 	# Note: x must be in the form (batch, seq length, features)
-	# NOTE FROM LUKE: I'm pretty sure we need to map the features down as well, the output of LSTM is in the dimension of the hidden layer
+	# Note: we also add a linear layer to account for PyTorch's LSTM output format
+	# (by default, it has the dimensions of the hidden layer)
 	def forward(self, x):
-		return self.model(x)	
+		lstm_out, (hidden, cell) = self.model(x)
+		return self.linear_layer(lstm_out)	
+
+	# Data packing function
+	def data_packing(self,data):
+		if data.dim() > 3:
+			self.original_data_shape = data.shape
+			collapsed_dim = torch.prod(torch.tensor(x.shape[2:])).item()
+        	data_packed = data.view(*data.shape[:2], collapsed_dim)
+
+        else:
+        	pass
+		return data_packed
+
+	# Data un-packing function
+	def data_unpacking(self,data):
+		if self.original_data_shape:
+			data_unpacked = data.view(self.original_data_shape)
+		else:
+			data_unpacked = data
+		return data_unpacked	
 
 
 
