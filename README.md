@@ -13,7 +13,7 @@ and **features corresponds to the data features associated with each timestep.
 These features can be organizaed as a single, flattened array, or as 
 a multi-dimensional grid (if one chooses an architecture that exploits spatial correlations). 
 
-Each member of the ```models``` subdirectory is configured to accept datasets in the standard form. In turn, each model script is outfitted with a custom data-packing method that converts the standard format into one accepted by the architecture of interest. 
+Each member of the ```models``` subdirectory is configured to accept datasets in the standard form. 
 
 
 ## Installing on Lonestar6
@@ -73,8 +73,8 @@ Adding a new architecure to TACC-Surrogates consists of the following two steps:
 Each entry in the ```models``` sub-directory inherits the Base_Model class defined in Base.py. This script contains the default training and evaluation methods. When writing a new model file, one will generally need to append the inherited base class with:
 
 1) An __init__ method, which defines the input arguments to your new model.
-2) A model object, which defines/links to your custom architecture. The model object is defined as self.model in the base __init__ and must be a torch.nn module object. Note that self.model does not need to be configured to accept the standard data format as input (we typically leave this as a separate data packing step).
-3) A loss-function object, which defines the loss function for your training loop. This is again defined as self.loss_function within the base __init__ and must be a torch.nn module object.
+2) A model object, which defines/links to your custom architecture. The model object is defined as self.model and must be a torch.nn module object. Note that self.model does not need to be configured to accept the standard data format as input (we typically leave this as a separate data packing step).
+3) A loss-function object, which defines the loss function for your training loop. This is defined as self.loss_function and again must be a torch.nn module object.
 4) A data-packing method. This method is repsonsible for converting input data from the standard format to a format accepted by self.model. Some model calls (such as Pytorch's LSTM) already work with the standard format, while others (such as the FNO) require shifting data channels.
 
 We recommend the FNO.py script as a reliable template for constructing new model architecture files.
