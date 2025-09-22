@@ -64,6 +64,7 @@ lstm_test = LSTM(
 print('done')
 
 # Train
+print('Calling .train')
 lstm_test.train(data_in,data_out)
 
 # Save

@@ -65,6 +65,7 @@ fno_test = FNO(
 print('done')
 
 # Train
+print('Calling .train')
 fno_test.train(data_in,data_out)
 
 # Save
