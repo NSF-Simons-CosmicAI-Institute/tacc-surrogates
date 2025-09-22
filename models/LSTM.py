@@ -61,11 +61,10 @@ class LSTM(Base_Model):
 	def data_packing(self,data):
 		if data.dim() > 3:
 			self.original_data_shape = data.shape
-			collapsed_dim = torch.prod(torch.tensor(x.shape[2:])).item()
-        	data_packed = data.view(*data.shape[:2], collapsed_dim)
-
-        else:
-        	pass
+			collapsed_dim = torch.prod(torch.tensor(data.shape[2:])).item()
+			data_packed = data.view(*data.shape[:2], collapsed_dim)
+		else:
+			pass
 		return data_packed
 
 	# Data un-packing function

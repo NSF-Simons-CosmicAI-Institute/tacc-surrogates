@@ -54,11 +54,11 @@ data_out = torch.tensor(data_out,dtype=torch.float32)
 
 # Initialize LSTM
 print('initializing LSTM')
-lstm_test = FNO(
+lstm_test = LSTM(
 		n_epoch = 2,
 		batch_size = 16,
 		input_size = data_in.shape[2:].numel(),
-		hidden_size = data_in.shape[2:].numel(),
+		hidden_size = 1024,
 		num_layers = 1
 	)
 print('done')
