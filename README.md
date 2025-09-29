@@ -4,11 +4,11 @@ TACC-Surrogates is a series of python wrappers and environment configuration fil
 
 The main advantage of TACC-Surrogates is its common data structure. Our intent is for the user
 to freely swap model architectures without having to reformat their dataset. Toward this end, we adopt the following standard shape for input/output datasets:
-
-(batch, num_timesteps_prior, **features)
-
-Here, batch corresponds to the batch dimension, num_timesteps_prior corresponds to the number
-of previous timesteps available to a given forward prediction (the same idea as sequence length),
+```
+(batch, sequence_length, **features)
+```
+Here, batch corresponds to the batch dimension, sequence_length corresponds to the number
+of previous timesteps (for input data) or the number of forward time steps (for output data),
 and **features corresponds to the data features associated with each timestep. 
 These features can be organizaed as a single, flattened array, or as 
 a multi-dimensional grid (if one chooses an architecture that exploits spatial correlations). 
