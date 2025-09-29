@@ -24,7 +24,7 @@ class DMD(torch.nn.Module):
 
 	# Forward pass function
 	def forward(self, x):
-		b = np.linalg.pinv(self.Phi)@x.cpu().detach().numpy()
+		b = np.linalg.pinv(self.Phi)@x
 		temp = self.Phi @ np.diag(np.exp(k*np.log(np.diag(self.Lambda)))) @ b
 		return np.real(temp).reshape(x.shape)
 	
