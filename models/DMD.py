@@ -24,7 +24,7 @@ class DMD(torch.nn.Module):
 
 	# Forward pass function
 	def forward(self, x):
-                b = np.linalg.pinv(self.Phi)@x
+		b = np.linalg.pinv(self.Phi)@x.cpu().detach().numpy()
 		temp = self.Phi @ np.diag(np.exp(k*np.log(np.diag(self.Lambda)))) @ b
 		return np.real(temp).reshape(x.shape)
 	
@@ -44,7 +44,7 @@ class DMD(torch.nn.Module):
 			data_packed = data
 
 		data_packed = torch.squeeze(data_packed)
-		return data_packed
+		return data_packed.cpu().detach().numpy()
 
 	# Data unpacking function
 	def data_unpacking(self,data):
@@ -59,9 +59,9 @@ class DMD(torch.nn.Module):
 	def train(self, data_in, data_out):
 
 		# Step 0: Pre-process the data matrix.
-		X = data_packing(data_in)
+		X = self.data_packing(data_in)
 		X = np.transpose(X,[1,0])
-		Xp = data_packing(data_out)
+		Xp = self.data_packing(data_out)
 		Xp = np.transpose(Xp,[1,0])
 
 		# Step 1: Compute the SVD of the dataset and truncate
@@ -88,7 +88,7 @@ class DMD(torch.nn.Module):
 		self.Lambda = Lambda
 
 	# Evaluation Function
-	def eval(self,x0,num_step):
+	def eval(self,x0):
 		# x0 - the data point from which the prediction starts
 		#    - assumed to be a single time step
 		x_in = self.data_packing(x0)

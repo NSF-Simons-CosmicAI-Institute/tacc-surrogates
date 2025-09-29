@@ -65,14 +65,14 @@ dmd_test.train(data_in,data_out)
 
 # Save
 print('Saving model...')
-torch.save(dmd_test,'lstm_flowbench.pth')
+torch.save(dmd_test,'dmd_flowbench.pth')
 print('done')
 
 # Eval
 print('Evaluating...')
-lstm_test = torch.load('lstm_flowbench.pth',weights_only=False)
-x0 = data_in[0:2]
-data_pred = lstm_test.eval(x0)
+dmd_test = torch.load('dmd_flowbench.pth',weights_only=False)
+x0 = data_in[0]
+data_pred = dmd_test.eval(x0)
 print('Size of evaluated dataset:')
 print(data_pred.shape)
 print('Done.')
