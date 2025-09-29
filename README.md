@@ -84,10 +84,10 @@ We recommend the FNO.py script as a reliable template for constructing new model
 
 The following is a master list of all architectures slated to be added to the ```models``` sub-directory. An (x) will be placed next to architectures that have been successfully uploaded and tested.
 
-- DMD
+- DMD (x)
 - Neural ODE 
 - FNO (x)
-- LSTM 
+- LSTM (x)
 - MLP
 - GINO - Geometry informed neural operator
 - U-Net
