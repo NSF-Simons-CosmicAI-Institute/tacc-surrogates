@@ -20,23 +20,48 @@ class DMD(torch.nn.Module):
 		):
 
 		super().__init__()
-
 		self.n_modes = n_modes
 
-	# Training function
-	# NOTE: THERE ARE TWO INPUTS HERE TO THIS FUNCTION: YOUR "INPUT DATA" AND "OUTPUT DATA"
-	# IN THAT SENSE, THE USER WILL FORMULATE THE X and Xp MATRICES
-	# THIS CODE BASICALLY THEN JUST FINDS THE BEST FIT LINEAR MAP BETWEEN INPUTS AND OUTPUTS
-	#
-	# Very important:
-	# data_in and data_out are assumed to be of shape: (time, space)
-	def train(self, data_in, data_out):
-		# data -- assumed to be a numpy array
-		X = data_in.reshape(data_in.shape[0],-1)
-		Xp = data_out.reshape(data_out.shape[0],-1)
+	# Forward pass function
+	def forward(self, x):
+                b = np.linalg.pinv(self.Phi)@x
+		temp = self.Phi @ np.diag(np.exp(k*np.log(np.diag(self.Lambda)))) @ b
+		return np.real(temp).reshape(x.shape)
+	
+	# Data packing function
+	def data_packing(self,data):
+		if data.shape[1] > 1:
+			print('Error! DMD requires a sequence length of 1. Please reformat your dataset.')
+			return 1
+		else:
+			pass
 
-		# Step 0: Pre-process the data matrix. Note that this step creates two data matrices: (1) the data matrix X at time t, and (2) the data matrix Xp at time t+dt.
+		if data.dim() > 3:
+			collapsed_dim = torch.prod(torch.tensor(data.shape[2:])).item()
+			data_packed = data.view(*data.shape[:2], collapsed_dim)
+			self.original_data_shape = data.shape
+		else:
+			data_packed = data
+
+		data_packed = torch.squeeze(data_packed)
+		return data_packed
+
+	# Data unpacking function
+	def data_unpacking(self,data):
+		if self.original_data_shape:
+			data_unpacked = data.view(self.original_data_shape)
+		else:
+			data_unpacked = data
+		return data_unpacked	
+
+
+	# Training function
+	def train(self, data_in, data_out):
+
+		# Step 0: Pre-process the data matrix.
+		X = data_packing(data_in)
 		X = np.transpose(X,[1,0])
+		Xp = data_packing(data_out)
 		Xp = np.transpose(Xp,[1,0])
 
 		# Step 1: Compute the SVD of the dataset and truncate
@@ -66,19 +91,9 @@ class DMD(torch.nn.Module):
 	def eval(self,x0,num_step):
 		# x0 - the data point from which the prediction starts
 		#    - assumed to be a single time step
-		# num_step - the number of forward steps to predict
-		xPred = np.zeros(((num_step,)+x0.shape))
-		xPred[0] = x0.reshape(-1)
-
-		# Reformat initial condition
-		b = np.linalg.pinv(self.Phi)@xPred[0]
-
-		# Loop through successive time steps
-		for k in range(1,num_step):
-			temp = self.Phi @ np.diag(np.exp(k*np.log(np.diag(self.Lambda)))) @ b
-			xPred[k,:] = np.real(temp).reshape(x0.shape)
-
-		# Return forward prediction
-		return xPred	
+		x_in = self.data_packing(x0)
+		x_pred = self.forward(x_in)
+		x_out = self.data_unpacking(x_pred)
+		return x_out	
 
     
