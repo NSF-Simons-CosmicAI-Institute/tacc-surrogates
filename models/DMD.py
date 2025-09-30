@@ -24,9 +24,12 @@ class DMD(torch.nn.Module):
 
 	# Forward pass function
 	def forward(self, x):
+		x = np.transpose(x,[1,0])
 		b = np.linalg.pinv(self.Phi)@x
+		k = 1.
 		temp = self.Phi @ np.diag(np.exp(k*np.log(np.diag(self.Lambda)))) @ b
-		return np.real(temp).reshape(x.shape)
+		temp = np.real(temp).reshape(x.shape)
+		return np.transpose(temp,[1,0])
 	
 	# Data packing function
 	def data_packing(self,data):
@@ -49,10 +52,10 @@ class DMD(torch.nn.Module):
 	# Data unpacking function
 	def data_unpacking(self,data):
 		if self.original_data_shape:
-			data_unpacked = data.view(self.original_data_shape)
+			data_unpacked = data.reshape(self.original_data_shape)
 		else:
 			data_unpacked = data
-		return data_unpacked	
+		return torch.tensor(data_unpacked,dtype=torch.float32)	
 
 
 	# Training function

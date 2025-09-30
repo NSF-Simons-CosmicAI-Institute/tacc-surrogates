@@ -71,7 +71,7 @@ print('done')
 # Eval
 print('Evaluating...')
 dmd_test = torch.load('dmd_flowbench.pth',weights_only=False)
-x0 = data_in[0]
+x0 = data_in[0:2]
 data_pred = dmd_test.eval(x0)
 print('Size of evaluated dataset:')
 print(data_pred.shape)
