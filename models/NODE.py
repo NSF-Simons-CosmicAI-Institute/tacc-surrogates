@@ -26,9 +26,14 @@ class NODE(Base_Model):
 	# Initialization:
 	def __init__(
 		self,
-		n_channel: int,
+		num_prior: int = 1,			# must be = 1 for neural ODE
+		num_forward: int,
+		num_vector_components: int,
+		grid_dimension: int, 		# options are 1 and 2
 		kernel_size: int = 5,
 		padding: str = 'same',
+		stride: int = 1,
+		activation: str = 'relu', 	# options are 'relu' and 'tanh'
 		n_epoch: int,
 		batch_size: int,
 		learning_rate: float = 1e-3
@@ -36,35 +41,69 @@ class NODE(Base_Model):
 
 			super().__init__(n_epoch,batch_size,learning_rate)
 
-			self.n_channel = n_channel
+			self.num_prior = num_prior
+			self.num_forward = num_forward
+			self.n_channel = num_vector_components
 			self.kernel_size = kernel_size
 			self.padding = padding
+			self.stride = stride
+			if activation == 'relu':
+				self.activation = nn.ReLU()
+			elif activation == 'tanh':
+				self.activation = nn.Tanh()
+			if grid_dimension == 1:
+				self.grid_dimension = 1
+				self.conv = nn.Conv2d()
+			elif grid_dimension == 2:
+				self.grid_dimension = 2
+				self.conv = nn.Conv1d()	
 
 			# Neural network definition
 			self.ode = nn.Sequential(
-				nn.Conv2d(self.n_channel,2*self.n_channel,kernel_size=self.kernel_size,stride=1,padding=self.padding),
-				nn.Tanh(),
-				nn.Conv2d(2*self.n_channel,4*self.n_channel,kernel_size=self.kernel_size,stride=1,padding=self.padding),
-				nn.Tanh(),
-				nn.Conv2d(4*self.n_channel,2*self.n_channel,kernel_size=self.kernel_size,stride=1,padding=self.padding),
-				nn.Tanh(),
-				nn.Conv2d(2*self.n_channel,self.n_channel,kernel_size=self.kernel_size,stride=1,padding=self.padding)
+				self.conv(self.n_channel,2*self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding),
+				self.activation,
+				self.conv(2*self.n_channel,4*self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding),
+				self.activation,
+				self.conv(4*self.n_channel,2*self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding),
+				self.activation,
+				self.conv(2*self.n_channel,self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding)
 				)
+
+			self.loss_function = nn.MSELoss()
 
 	# Forward pass function:
 	def forward(self, t, x):
-		return self.ode(x)		
+		return self.ode(x)	
+
+	# Data packing function
+	def data_packing(self,data):
+		if self.num_vector_components > 1:
+			data_moved = torch.moveaxis(data,1,-1)
+			data_flat = data_moved.reshape(*data_moved.shape[:-2],-1)
+			data_packed = torch.moveaxis(data_flat,-1,1)
+		else:
+			data_packed = data
+		return data_packed	
+
+	def data_unpacking(self,data):
+		if self.num_vector_components > 1:
+			data_moved = torch.moveaxis(data,1,-1)
+			data_expanded = data_moved.reshape((*data_moved.shape[:-1], self.num_vector_components, self.num_forward))
+			data_unpacked = torch.moveaxis(data_expanded,-1,1)
+		else:
+			data_unpacked = data
+		return data_unpacked			
 
 	# Training function:
-	# IT WOULD BE VERY NICE IF WE COULD ALSO A VECTOR THAT SPECIFIES TIME STEP
-	# SEPARATION BETWEEN INPUTS AND OUTPUTS. THIS WAY WE COULD HAVE MULTIPLE 
-	# TIME STEP SEPARATIONS IN THE INPUT/OUTPUT DATA.
-	#
-	# CURRENTLY SET UP TO HANDLE DATA AT ADJACENT TIME STEPS
 	def train(self, data_in, data_out):
 
-		optimizer = optim.Adam(list(self.ode.parameters()), lr = 1e-3)
+		optimizer = optim.Adam(list(self.ode.parameters()), lr = self.learning_rate)
 
+		print('Packing data...')
+		data_in = self.data_packing(data_in)
+		data_out = self.data_packing(data_out)
+
+		print('Starting training...')
 		for it in range(0, self.n_epoch):
 
 			ind_shuffle = torch.randperm(data_in.size()[0])
@@ -78,23 +117,21 @@ class NODE(Base_Model):
 				if ind+batch_size > data_in.size()[0]:
 					ind_batch = range(ind,data_in.size()[0])
 
-				y_pred = odeint(self,data_in[ind_batch],torch.arange(0,2,dtype=torch.float32))
+				y_pred = odeint(self,data_in[ind_batch],torch.arange(0,self.num_forward,dtype=torch.float32))
 				y_pred = torch.squeeze(y_pred[1:])
-				loss = torch.mean((y_pred-data_out[ind_batch])**2)
+				loss = self.loss_function(y_pred,data_out[ind_batch])
 				loss.backward()
 				optimizer.step()
 			
-			if it==0 or it%10==0:
-				print('Epoch: ' + str(it) + '  |  ' + 'Loss: ' + str(float(loss.item())))
+			print('Epoch: ' + str(it) + '  |  ' + 'Loss: ' + str(float(loss.item())))
 
 	# Evaluation function:
-	def eval(self,x0,num_steps):
+	def eval(self,x0):
 		# x0 - the data point from which the prediction starts
-		#    - assumed to be a single time step
-		# num_step - the number of forward steps to predict
-
-		x_pred = odeint(self,x0,torch.arange(0,num_steps,dtype=torch.float32))
-		return x_pred
+		x_in = self.data_packing(x0)
+		x_pred = odeint(self,x_in,torch.arange(0,self.num_forward,dtype=torch.float32))
+		x_out = self.data_unpacking(x_pred)
+		return x_out
 
 
 
