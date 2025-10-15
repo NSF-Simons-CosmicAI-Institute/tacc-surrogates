@@ -116,11 +116,11 @@ class NODE(Base_Model):
 			data_in = data_in[ind_shuffle]
 			data_out = data_out[ind_shuffle]
 
-			for ind in range(0,data_in.size()[0],batch_size):
+			for ind in range(0,data_in.size()[0],self.batch_size):
 				optimizer.zero_grad()
-				ind_batch = range(ind,ind+batch_size)
+				ind_batch = range(ind,ind+self.batch_size)
 
-				if ind+batch_size > data_in.size()[0]:
+				if ind+self.batch_size > data_in.size()[0]:
 					ind_batch = range(ind,data_in.size()[0])
 
 				y_pred = odeint(self,data_in[ind_batch],torch.arange(0,self.num_forward,dtype=torch.float32))
