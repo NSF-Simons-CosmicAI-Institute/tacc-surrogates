@@ -124,7 +124,7 @@ class NODE(Base_Model):
 					ind_batch = range(ind,data_in.size()[0])
 
 				y_pred = odeint(self,data_in[ind_batch],torch.arange(0,self.num_forward+1,dtype=torch.float32))
-				y_pred = torch.squeeze(y_pred[1:]) 
+				y_pred = y_pred[1:] 
 				y_pred = y_pred.swapdims(1,2)
 				y_pred = y_pred.reshape(y_pred.shape[0]*y_pred.shape[1],*y_pred.shape[2:]) 
 				y_pred = y_pred.swapdims(0,1)
