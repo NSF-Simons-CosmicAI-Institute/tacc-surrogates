@@ -51,23 +51,28 @@ class NODE(Base_Model):
 				self.activation = nn.ReLU()
 			elif activation == 'tanh':
 				self.activation = nn.Tanh()
-			if grid_dimension == 1:
-				self.grid_dimension = 1
-				self.conv = nn.Conv1d()
-			elif grid_dimension == 2:
-				self.grid_dimension = 2
-				self.conv = nn.Conv2d()	
 
 			# Neural network definition
-			self.ode = nn.Sequential(
-				self.conv(in_channels=self.n_channel,out_channels=2*self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding),
-				self.activation,
-				self.conv(in_channels=2*self.n_channel,out_channels=4*self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding),
-				self.activation,
-				self.conv(in_channels=4*self.n_channel,out_channels=2*self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding),
-				self.activation,
-				self.conv(in_channels=2*self.n_channel,out_channels=self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding)
-				)
+			if grid_dimension == 1:
+				self.ode = nn.Sequential(
+					nn.Conv1d(in_channels=self.n_channel,out_channels=2*self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding),
+					self.activation,
+					nn.Conv1d(in_channels=2*self.n_channel,out_channels=4*self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding),
+					self.activation,
+					nn.Conv1d(in_channels=4*self.n_channel,out_channels=2*self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding),
+					self.activation,
+					nn.Conv1d(in_channels=2*self.n_channel,out_channels=self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding)
+					)
+			elif: grid_dimension == 2:	
+				self.ode = nn.Sequential(
+					nn.Conv2d(in_channels=self.n_channel,out_channels=2*self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding),
+					self.activation,
+					nn.Conv2d(in_channels=2*self.n_channel,out_channels=4*self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding),
+					self.activation,
+					nn.Conv2d(in_channels=4*self.n_channel,out_channels=2*self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding),
+					self.activation,
+					nn.Conv2d(in_channels=2*self.n_channel,out_channels=self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding)
+					)
 
 			self.loss_function = nn.MSELoss()
 
