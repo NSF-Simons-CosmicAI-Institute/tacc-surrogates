@@ -26,7 +26,7 @@ class NODE(Base_Model):
 	# Initialization:
 	def __init__(
 		self,
-		num_prior: int = 1,			# must be = 1 for neural ODE
+		num_prior: int,			# must be = 1 for neural ODE
 		num_forward: int,
 		num_vector_components: int,
 		grid_dimension: int, 		# options are 1 and 2
