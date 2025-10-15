@@ -43,6 +43,7 @@ class NODE(Base_Model):
 
 			self.num_prior = num_prior
 			self.num_forward = num_forward
+			self.num_vector_components = num_vector_components
 			self.n_channel = num_vector_components
 			self.kernel_size = kernel_size
 			self.padding = padding
