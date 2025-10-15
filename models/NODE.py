@@ -63,7 +63,7 @@ class NODE(Base_Model):
 					self.activation,
 					nn.Conv1d(in_channels=2*self.n_channel,out_channels=self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding)
 					)
-			elif: grid_dimension == 2:	
+			elif grid_dimension == 2:	
 				self.ode = nn.Sequential(
 					nn.Conv2d(in_channels=self.n_channel,out_channels=2*self.n_channel,kernel_size=self.kernel_size,stride=self.stride,padding=self.padding),
 					self.activation,
