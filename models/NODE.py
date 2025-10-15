@@ -30,12 +30,12 @@ class NODE(Base_Model):
 		num_forward: int,
 		num_vector_components: int,
 		grid_dimension: int, 		# options are 1 and 2
+		n_epoch: int,
+		batch_size: int,
 		kernel_size: int = 5,
 		padding: str = 'same',
 		stride: int = 1,
 		activation: str = 'relu', 	# options are 'relu' and 'tanh'
-		n_epoch: int,
-		batch_size: int,
 		learning_rate: float = 1e-3
 		):
 
