@@ -138,8 +138,8 @@ class NODE(Base_Model):
 	def eval(self,x0):
 		# x0 - the data point from which the prediction starts
 		x_in = self.data_packing(x0)
-		x_pred = odeint(self,x_in,torch.arange(0,self.num_forward,dtype=torch.float32))
-		x_pred = torch.squeeze(x_pred[1:]) 
+		x_pred = odeint(self,x_in,torch.arange(0,self.num_forward+1,dtype=torch.float32))
+		x_pred = x_pred[1:] 
 		x_pred = x_pred.swapdims(1,2)
 		x_pred = x_pred.reshape(x_pred.shape[0]*x_pred.shape[1],*x_pred.shape[2:])
 		x_pred = x_pred.swapdims(0,1)
