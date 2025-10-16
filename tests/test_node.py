@@ -12,12 +12,12 @@ from matplotlib import pyplot as plt
 print = functools.partial(print, flush=True)
 
 # Dataset Information: Reynolds number (FlowBench specific) and total number of cases
-num_cases = 3
+num_cases = 1
 re_target = 200.
 
 # Dataset Information: Time series specifications for each case
 num_timesteps_prior = 1
-num_timesteps_forward = 4
+num_timesteps_forward = 1
 num_timesteps_total = 242
 num_total_batches = num_cases*(num_timesteps_total-num_timesteps_prior-num_timesteps_forward)
 
