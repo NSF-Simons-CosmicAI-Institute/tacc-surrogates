@@ -15,7 +15,7 @@ num_timesteps_forward = 40
 
 # Intialize datasets
 print('Loading data...')
-root_dir='/scratch/10386/lsmith9003/data/helmhotlz_staircase/exports'
+root_dir='/scratch/10386/lsmith9003/data/helmhotlz_staircase/exports/'
 data_in = torch.tensor(np.load(root_dir+'data_in.npy'),dtype=torch.float32)
 data_out = torch.tensor(np.load(root_dir+'data_out.npy'),dtype=torch.float32)
 data_in_test = torch.tensor(np.load(root_dir+'data_in_test.npy'),dtype=torch.float32)
