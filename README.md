@@ -28,6 +28,11 @@ And executing a requirements install with pip:
 cd tacc-surrogates
 pip install tacc-surrogates/requirements.txt
 ```
+The ```tests/demo.py``` script serves as a quick way to confirm that your environment is configured correctly. This script loads 
+an acoustic scattering dataset and fits the data to a Fourier Neural Operator (FNO) model. Training should complete in a few minutes at most:
+```
+python -W ignore tests/demo.py 
+```
 
 If you encounter any issues with the requirements file, or if you want to offload environment maintenance, we are also hosting a pre-installed version of the environment on a TACC staff account. You can activate it with the following commands (permissions are set such that any user can activate):
 ```
