@@ -29,7 +29,7 @@ cd tacc-surrogates
 pip install tacc-surrogates/requirements.txt
 ```
 The ```tests/demo.py``` script serves as a quick way to confirm that your environment is configured correctly. This script loads 
-an acoustic scattering dataset and fits the data to a Fourier Neural Operator (FNO) model. Training should complete in a few minutes at most:
+an [acoustic scattering dataset](https://polymathic-ai.org/the_well/datasets/helmholtz_staircase/) and fits the data to a Fourier Neural Operator (FNO) model. Training should complete in a few minutes at most:
 ```
 python -W ignore tests/demo.py 
 ```
