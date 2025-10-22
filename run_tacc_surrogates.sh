@@ -19,4 +19,4 @@ source /scratch/10386/lsmith9003/python-envs/tacc-surrogates/bin/activate
 export PYTHONPATH=$SCRATCH/scripts/tacc-surrogates
 
 # Run flow bench training/evaluation
-python tests/demo.py
+python -W ignore tests/demo.py
