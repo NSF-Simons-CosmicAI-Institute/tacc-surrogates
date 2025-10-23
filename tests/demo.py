@@ -52,7 +52,7 @@ print(data_pred.shape)
 print('Done.')
 
 # Plot time series prediction
-os.makedirs('images',exists_ok=True)
+os.makedirs('images',exist_ok=True)
 data_pred = data_pred[0]
 data_pred = data_pred[...,1]
 data_pred = data_pred.detach().numpy()
