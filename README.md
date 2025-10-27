@@ -93,12 +93,12 @@ The following is a master list of all architectures slated to be added to the ``
 - Neural ODE (x) 
 - FNO (x)
 - LSTM (x)
-- MLP
+- GNN (in progress)
+- Transformer (in progress)
 - GINO - Geometry informed neural operator
 - U-Net
 - Deep-O-Net
 - PINN
-- GNN
 - SINDy 
 - Hamiltonian/Lagrangian NN
 - PINO 
