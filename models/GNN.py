@@ -52,29 +52,18 @@ class GNN(Base_Model):
 		elif activation == 'tanh':
 			self.activation = nn.Tanh()
 
-		self.model = nn.Sequential(
-			GCNConv(self.num_prior*self.num_vector_components,self.hidden_channels),
-			self.activation,
-			GCNConv(self.hidden_channels,self.num_forward*self.num_vector_components)
-			)
+		self.conv1 = GCNConv(self.num_prior*self.num_vector_components,self.hidden_channels)
+		self.conv2 = GCNConv(self.hidden_channels,self.num_forward*self.num_vector_components)
+		self.edge_matrix = nn.Parameter(torch.randn(2,self.num_edges,requires_grad=True))
 
 		self.loss_function = nn.MSELoss()
 
 	# Forward pass function
 	def forward(self, x, edge_matrix):
-		return self.model(x,edge_matrix)	
-
-	# Edge matrix definition
-	# NOTE: This function operates on the packed data, so that we don't have to recollapse
-	# the space dimensions
-	# NOTE: This function is currently configured to create a fully-learnable edge matrix
-	def init_edge_matrix(self, node_list):
-		self.edge_encoder = nn.Sequential(
-			nn.Linear(len(node_list),2*self.num_edges),
-			nn.ReLU(),
-			nn.Linear(2*self.num_edges,2*self.num_edges),
-			nn.ReLU()
-			)
+		x = self.conv1(x,edge_matrix)
+		x = self.activation(x)
+		x = self.conv2(x,edge_matrix)
+		return x	
 
 	# Data packing function
 	def data_packing(self,data):
@@ -108,11 +97,13 @@ class GNN(Base_Model):
 		data_in = self.data_packing(data_in)
 		data_out = self.data_packing(data_out)
 
-		print('Initializing edge matrix...')
-		self.init_edge_matrix(torch.arange(0,data_in.shape[1],step=1))
-
 		print('Setting up optimizer...')
-		optimizer = optim.Adam(list(self.model.parameters(),self.edge_encoder.parameters()), lr = self.learning_rate)
+		#optimizer = optim.Adam(list(self.conv1.parameters())+list(self.conv2.parameters())+[self.edge_matrix], lr = self.learning_rate)
+		optimizer = optim.Adam([
+			{'params': self.conv1.parameters()},
+			{'params': self.conv2.parameters()},			
+			{'params': self.edge_matrix, 'lr': self.learning_rate}
+			],lr = self.learning_rate)
 
 		print('Starting training...')
 		for it in range(0, self.n_epoch):
@@ -123,8 +114,9 @@ class GNN(Base_Model):
 
 			for ind in range(0,data_in.size()[0],self.batch_size):
 				optimizer.zero_grad()
-				edge_matrix = self.edge_encoder(torch.arange(0,data_in.shape[1],step=1))
-				edge_matrix = edge_matrix.reshape((2,self.num_edges))
+				edge_matrix = torch.abs(self.edge_matrix)
+				edge_matrix = edge_matrix/torch.max(edge_matrix)
+				edge_matrix = edge_matrix*(data_in.shape[1]-1)
 				edge_matrix = edge_matrix.to(torch.int32)
 
 				ind_batch = range(ind,ind+self.batch_size)
@@ -137,7 +129,7 @@ class GNN(Base_Model):
 				loss.backward()
 				optimizer.step()
 			print('Epoch: ' + str(it) + '  |  ' + 'Loss: ' + str(float(loss.item())))
-		self.edge_matrix = edge_matrix
+			print(self.edge_matrix.grad)
 
 	# Evaluation function:
 	def eval(self,x0):
