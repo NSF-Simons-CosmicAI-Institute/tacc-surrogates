@@ -1,22 +1,19 @@
 #!/bin/bash
 
-#SBATCH -J run-fno-training               # Job name
+#SBATCH -J run-epidemic-training               # Job name
 #SBATCH -o log.%j                         	 # Name of stdout output file (%j expands to jobId)
-#SBATCH -p gpu-a100-dev                              # Queue name
+#SBATCH -p gh-dev                       # Queue name
 #SBATCH -N 1                                 # Total number of nodes requested (56 cores/node)
 #SBATCH -n 1                                 # Total number of mpi tasks requested
-#SBATCH -t 02:00:00                          # Run time (hh:mm:ss)
+#SBATCH -t 2:00:00                          # Run time (hh:mm:ss)
 #SBATCH -A XXXXXXXX							 # Project charge code
 
-####SBATCH --mail-type=all
-####SBATCH --mail-user=XXXXX@tacc.utexas.edu
-
 # Load CUDA module
-module load cuda/12.2
+module load cuda/12.8
 
 # Load tacc-surrogates libraries
-source /scratch/10386/lsmith9003/python-envs/tacc-surrogates/bin/activate
+source /scratch/10386/lsmith9003/py-envs/tacc-surrogates/bin/activate
 export PYTHONPATH=$SCRATCH/scripts/tacc-surrogates
 
 # Run flow bench training/evaluation
-python -W ignore tests/demo.py
+python -W ignore main.py
