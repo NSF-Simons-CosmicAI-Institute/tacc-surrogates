@@ -17,6 +17,15 @@ import torch.nn.functional as F
 # Import default loss function
 from loss_functions.MSE import MSE
 
+import torch.distributed as dist
+
+
+def print_on_rank0(*args, **kwargs):
+    """Print only on rank 0 process."""
+    if int(os.environ.get("RANK", 0)) == 0:
+        print(*args, **kwargs)      
+
+
 # Base Model: template class that includes methods common to all architectures
 class Base_Model(torch.nn.Module):
 
@@ -77,6 +86,35 @@ class Base_Model(torch.nn.Module):
 				optimizer.step()
 
 			print('Epoch: ' + str(it) + '  |  ' + 'Loss: ' + str(float(loss.item())))
+
+
+	# Training function (multinode)
+	def train_multinode(self, data_loader):
+
+		optimizer = optim.Adam(list(self.model.parameters()), lr = self.learning_rate)
+
+		print_on_rank0('Starting training...')
+		for it in range(0, self.n_epoch):
+
+			loss_track = 0.0
+
+			for batch_idx, (data_in, data_out) in enumerate(data_loader):
+				optimizer.zero_grad()
+				y_pred = self.forward(data_in)
+				loss = self.loss_function(y_pred,data_out)
+				loss_track += loss.item()
+				loss.backward()
+				optimizer.step()
+
+			if dist.is_initialized():
+				loss_track_tensor = torch.tensor(loss_track).to(device)
+				dist.all_reduce(loss_track_tensor, op=dist.ReduceOp.SUM)
+
+			if dist.is_initialized():
+				dist.barrier()	
+
+			print_on_rank0('Epoch: ' + str(it) + '  |  ' + 'Loss: ' + str(float(loss_track.item())))
+			
 
 	# Evaluation function:
 	def eval(self,x0):
