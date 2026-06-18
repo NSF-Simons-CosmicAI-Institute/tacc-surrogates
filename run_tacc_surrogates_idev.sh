@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Load CUDA module
 module load cuda/12.8
 
@@ -5,7 +7,17 @@ module load cuda/12.8
 source /scratch/10386/lsmith9003/py-envs/tacc-surrogates/bin/activate
 export PYTHONPATH=$SCRATCH/scripts/tacc-surrogates:$PYTHONPATH
 
-# Run flow bench training/evaluation
-python -W ignore main.py
-#python -W ignore model_analysis_test.py
-#python -W ignore pca_analysis.py
+# Run training/evaluation (single node)
+#python -W ignore main.py
+
+# Run training/evaluation (multinode)
+HOST=$1
+NODES=$2
+LOCAL_RANK=${OMPI_COMM_WORLD_RANK}
+torchrun \
+	--nnodes=$NODES \
+	--nproc-per-node=1 \
+	--node_rank=${LOCAL_RANK} \
+	--master_addr=$HOST \
+	main_multinode.py
+

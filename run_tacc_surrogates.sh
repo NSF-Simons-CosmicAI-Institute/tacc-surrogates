@@ -15,5 +15,9 @@ module load cuda/12.8
 source /scratch/10386/lsmith9003/py-envs/tacc-surrogates/bin/activate
 export PYTHONPATH=$SCRATCH/scripts/tacc-surrogates
 
-# Run flow bench training/evaluation
-python -W ignore main.py
+# Run training/evaluation (single node)
+#python -W ignore main.py
+
+# Run training/evaluation (multinode)
+MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
+mpirun -np 2 --map-by ppr:1:node run_tacc_surrogates_idev.sh $MASTER_ADDR $SLURM_JOB_NUM_NODES

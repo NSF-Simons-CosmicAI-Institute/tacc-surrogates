@@ -7,19 +7,20 @@ import torch
 import glob
 import time
 import json
+import datetime
 from matplotlib import pyplot as plt
-from models.EPI import EPI 
+from models.EPI_multinode import EPI 
 
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.utils.data import DataLoader, DistributedSampler
-
+from torch.utils.data import DataLoader, DistributedSampler, TensorDataset
+import torch.optim as optim
 
 
 # -------------------- Setup Functions -------------------- #
 
 
-def setup_distributed(args):
+def setup_distributed():
     """
     Initialize the distributed process group.
     
@@ -171,8 +172,8 @@ data_in = torch.tensor(data_in,dtype=torch.float32)
 data_out = torch.tensor(data_out,dtype=torch.float32)
 
 # Move to GPU
-data_in = data_in.to(device)
-data_out = data_out.to(device)
+#data_in = data_in.to(device)
+#data_out = data_out.to(device)
 
 # Create dataset, sampler, and data loader based on loaded epidemic data
 dataset = TensorDataset(data_in, data_out)
@@ -180,8 +181,8 @@ sampler = DistributedSampler(
         dataset,
         num_replicas=world_size,
         rank=rank,
-        shuffle=shuffle,
-        drop_last=drop_last
+        shuffle=True,
+        drop_last=False
     )
 loader = DataLoader(dataset, batch_size=32, shuffle=True)
 
@@ -224,7 +225,7 @@ epi = EPI(
 	edge_weight=edge_weight,
 	county_pop=county_pop,
 	hidden_channels=64,
-	n_epoch= 5,
+	n_epoch= 1,
 	batch_size=16,
 	learning_rate = 1e-3,
 	num_prior=num_timesteps_prior,
@@ -253,7 +254,32 @@ epi = DDP(
 
 # Train model
 #epi.train(data_in,data_out)
-epi.train_multinode(loader)
+optimizer = optim.Adam(list(epi.parameters()), lr = epi.module.learning_rate)
+
+print_on_rank0('Starting training...')
+for it in range(0, epi.module.n_epoch):
+
+    loss_track = 0.0
+    start_time = time.perf_counter()
+
+    for batch_idx, (data_in, data_out) in enumerate(loader):
+        data_in = data_in.to(device)
+        data_out = data_out.to(device)
+        optimizer.zero_grad()
+        loss = epi(data_out,data_in)
+        loss_track += loss.item()
+        loss.backward()
+        optimizer.step()
+
+    if dist.is_initialized():
+        loss_track_tensor = torch.tensor(loss_track).to(device)
+        dist.all_reduce(loss_track_tensor, op=dist.ReduceOp.SUM)
+
+    if dist.is_initialized():
+        dist.barrier()
+    
+    end_time = time.perf_counter()
+    print_on_rank0('Epoch: ' + str(it) + '  |  ' + 'Loss: ' + str(loss_track) + '  |  ' + 'Time: ' + str(int(end_time-start_time)))
 
 # Save final model
 print_on_rank0('Saving final model...')
@@ -281,7 +307,7 @@ if int(os.environ.get("RANK", 0)) == 0:
 
 	# Evaluate samples
 	start_time = time.perf_counter()
-	data_pred = epi(sample)
+	data_pred = epi.module.rollout(sample)
 	end_time = time.perf_counter()
 	print('Size of evaluated dataset:')
 	print(data_pred.shape)
