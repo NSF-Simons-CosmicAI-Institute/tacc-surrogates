@@ -3,9 +3,11 @@
 torch
 numpy
 scipy
+scikit-learn
 matplotlib
 h5py
 neuraloperator
 torchdiffeq
 torch_geometric
 normflows
+geomloss
