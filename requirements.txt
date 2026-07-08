@@ -12,3 +12,4 @@ torchdiffeq
 torch_geometric
 normflows
 geomloss
+pykeops
