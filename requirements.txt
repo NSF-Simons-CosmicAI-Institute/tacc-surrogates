@@ -6,6 +6,7 @@ scipy
 scikit-learn
 matplotlib
 h5py
+pandas
 neuraloperator
 torchdiffeq
 torch_geometric
